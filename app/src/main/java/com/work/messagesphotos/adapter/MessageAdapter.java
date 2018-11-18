@@ -1,8 +1,19 @@
 package com.work.messagesphotos.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.format.DateFormat;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +25,13 @@ import com.bumptech.glide.request.RequestOptions;
 import com.work.messagesphotos.R;
 import com.work.messagesphotos.models.Datum;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -74,18 +90,70 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         .placeholder(R.mipmap.ic_launcher_round)
                         .error(R.mipmap.ic_launcher_round);
 
-                Glide.with(context)
+                /*Glide.with(context)
                         .load(datum.getUserPhotoUrl()) // image url
                         .apply(options)
-                        .into(dataViewHolder.imageView);
+                        .into(dataViewHolder.imageView);*/
 
-                dataViewHolder.tweet.setText(datum.getTweet());
+                String url = ExtractUrl(datum.getTweet());
+                String tweetOnly = datum.getTweet().replace(url,"");
+                dataViewHolder.tweet.setText(tweetOnly);
+
+                SpannableString content = new SpannableString(url.trim());
+                content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+                dataViewHolder.url.setText(content);
+                final String _url = url.trim();
+                dataViewHolder.url.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(_url));
+                    context.startActivity(i);
+                }
+            });
+
                 dataViewHolder.name.setText(datum.getName());
+                dataViewHolder.screenname.setText(datum.getScreenName());
+                dataViewHolder.social.setText("via " + datum.getSocialType());
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+                try {
+                    Date date = dateFormat.parse(datum.getOriginalPostDateTime());
+                    String dayOfTheWeek = (String) DateFormat.format("E", date);
+                    String monthString  = (String) DateFormat.format("MMM",  date);
+                    String time  = (String) DateFormat.format("HH:mm",  date);
+                    String year = (String) DateFormat.format("yyyy", date); // 2013
+                    dataViewHolder.datetime.setText(dayOfTheWeek +" "+ monthString +" "+ year +" "+ time);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case LOADING:
 //                Do nothing
                 break;
         }
+    }
+
+
+
+    private String ExtractUrl(String tweet) {
+        // Pattern for recognizing a URL, based off RFC 3986
+
+        String containedUrls = "";
+          final Pattern urlPattern = Pattern.compile(
+                "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
+                        + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
+                        + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+        Matcher urlMatcher = urlPattern.matcher(tweet);
+        while (urlMatcher.find())
+        {
+            containedUrls = tweet.substring(urlMatcher.start(0),
+                    urlMatcher.end(0));
+        }
+
+        return containedUrls;
     }
 
     @Override
@@ -164,14 +232,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * Main list's content ViewHolder
      */
     protected class DataViewHolder extends RecyclerView.ViewHolder {
-        private TextView name, tweet;
+        private TextView name, tweet, screenname, datetime, social, url;
         private ImageView imageView;
 
         public DataViewHolder(View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.photo);
+          //  imageView = itemView.findViewById(R.id.photo);
             tweet = itemView.findViewById(R.id.tweet);
+            screenname = itemView.findViewById(R.id.screenname);
             name = itemView.findViewById(R.id.name);
+            datetime = itemView.findViewById(R.id.time);
+            url = itemView.findViewById(R.id.url);
+            social = itemView.findViewById(R.id.social);
         }
     }
 

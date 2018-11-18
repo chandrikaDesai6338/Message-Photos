@@ -7,9 +7,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitHelper {
 
-    public static String BASE_URL = "http://sbut-app.testground.me/api/";
+    public String BASE_URL = "";
 
-    public RetrofitAPIInterface getRetrofitAPIInterface(){
+    public RetrofitAPIInterface getRetrofitAPIInterface(String BASE_URL){
+        this.BASE_URL = BASE_URL;
         final Retrofit retrofit = createRetrofit();
         return retrofit.create(RetrofitAPIInterface.class);
     }

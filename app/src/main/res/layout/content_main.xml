@@ -5,18 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MainActivity"
+    tools:context=".ui.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvUsers"
+    <android.support.design.widget.TabLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
-        android:padding="5dp" />
+        android:id="@+id/tablayout"
+        app:tabTextColor="@color/colorAccent"
+        android:background="@drawable/gradientbackground"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <ProgressBar
+    </android.support.design.widget.TabLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/container"
+        android:layout_marginTop="50dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 </FrameLayout>
